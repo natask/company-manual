@@ -56,13 +56,20 @@
   (advice-remove 'company--insert-candidates #'company-manual-end)
   (advice-remove 'company-cancel #'company-manual-end))
 
+(defun company-manual-mode-on ()
+  "For use of `global-company-manual-mode'.
+Enables `company-manual-mode' where `company-mode' would be enabled through `company-global-modes'."
+  (when (and (not (or noninteractive (eq (aref (buffer-name) 0) ?\s)))
+             (cond ((eq company-global-modes t)
+                    t)
+                   ((eq (car-safe company-global-modes) 'not)
+                    (not (memq major-mode (cdr company-global-modes))))
+                   (t (memq major-mode company-global-modes))))
+    (company-manual-mode 1)))
+
 ;;;###autoload
 (define-minor-mode company-manual-mode
-  "`company-manual-mode' to operate `company-mode' manually.
-\\{company-manual-mode-map}
-keymap during active completions (`company-manual-active-map'):
-
-\\{company-manual-active-map}"
+  "`company-manual-mode' to operate `company-mode' manually."
   :lighter nil
   (if company-manual-mode
       (progn
@@ -74,7 +81,7 @@ keymap during active completions (`company-manual-active-map'):
     (company-manual-mode-disable)
     (company-mode 0)))
 
-(define-globalized-minor-mode global-company-manual-mode company-manual-mode company-mode-on)
+(define-globalized-minor-mode global-company-manual-mode company-manual-mode company-manual-mode-on)
 
 (provide 'company-manual)
 ;;; company-manual.el ends here
