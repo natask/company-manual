@@ -33,6 +33,12 @@
   (remove-hook 'post-command-hook 'company-post-command t)
   args)
 
+(defun company-manual-helm-end (&optional args)
+  "Disassemble company. Pass through ARGS."
+  (company-manual-end)
+  (company-abort)
+  args)
+
 (defun company-manual-start-fn ()
   "Make company-mode functions execute only manually."
   (remove-hook 'pre-command-hook 'company-pre-command t)
@@ -45,16 +51,18 @@
   (advice-add 'company-manual-begin :after #'company-manual-start)
   (advice-add 'company-complete-common :after #'company-manual-start)
   (advice-add 'company-complete-selection :before #'company-manual-start)
-  (advice-add 'company--insert-candidates :after #'company-manual-end)
-  (advice-add 'company-cancel :after #'company-manual-end))
+  (advice-add 'company--insert-candidate :after #'company-manual-end)
+  (advice-add 'company-cancel :after #'company-manual-end)
+  (advice-add 'helm-company :after #'company-manual-helm-end))
 
 (defun company-manual-mode-disable ()
   "Disable company manual mode."
   (advice-remove 'company-manual-begin #'company-manual-start)
   (advice-remove 'company-complete-common #'company-manual-start)
   (advice-remove 'company-complete-selection #'company-manual-start)
-  (advice-remove 'company--insert-candidates #'company-manual-end)
-  (advice-remove 'company-cancel #'company-manual-end))
+  (advice-remove 'company--insert-candidate #'company-manual-end)
+  (advice-remove 'company-cancel #'company-manual-end)
+  (advice-remove 'helm-company #'company-manual-helm-end))
 
 (defun company-manual-mode-on ()
   "For use of `global-company-manual-mode'.
